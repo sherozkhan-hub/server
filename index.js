@@ -5,6 +5,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const socket = require("./socket");
+const fileUpload = require("express-fileupload");
 // const errorMiddleware = require("./api/middlewares/error");
 
 // security
@@ -28,6 +29,11 @@ app.use(cors());
 // app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(
+  fileUpload({
+    useTempFiles: true,
+  })
+);
 // app.use(errorMiddleware);
 
 const { userRouter } = require("./api/routes/users.routes");

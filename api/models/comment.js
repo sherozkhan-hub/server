@@ -11,6 +11,8 @@ const commentSchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "Posts",
     },
+    comment: { type: String, required: true },
+    from: { type: String, required: true },
     replies: [
       {
         rid: { type: Schema.Types.ObjectId },

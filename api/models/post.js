@@ -7,7 +7,7 @@ const postSchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "Users",
     },
-    description: { type: String, required: true },
+    description: { type: String },
     image: { type: String },
     likes: [{ type: String }],
     comments: [{ type: Schema.Types.ObjectId, ref: "Comments" }],
@@ -17,4 +17,4 @@ const postSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Posts", postSchema);
+module.exports = mongoose.model("Post", postSchema);

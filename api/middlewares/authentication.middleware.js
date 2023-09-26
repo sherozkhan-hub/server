@@ -1,5 +1,4 @@
 const JWT = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET;
 
 const authentication = async (req, res, next) => {
   const bearerToken = req.headers.authorization;
@@ -9,8 +8,7 @@ const authentication = async (req, res, next) => {
   let decodedToken;
 
   try {
-    decodedToken = JWT.verify(token, JWT_SECRET);
-    req.userRoles = decodedToken.systemRoles;
+    decodedToken = JWT.verify(token, process.env.JWT_SECRET_KEY);
   } catch (error) {
     return res.status(403).json({
       message: "INVALID USER",
@@ -18,6 +16,7 @@ const authentication = async (req, res, next) => {
   }
 
   if (decodedToken) {
+    req.body.userId = decodedToken._id;
     next();
   } else {
     return res.status(404).json({

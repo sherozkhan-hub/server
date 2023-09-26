@@ -1,13 +1,11 @@
 const JWT = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET;
 
-const signToken = async (user) => {
+const signToken = async (userId) => {
   const tokenData = {
-    _id: user._id,
-    systemRoles: user.systemRoles,
+    _id: userId,
   };
 
-  const signedToken = await JWT.sign(tokenData, JWT_SECRET);
+  const signedToken = await JWT.sign(tokenData, process.env.JWT_SECRET_KEY);
   return signedToken;
 };
 

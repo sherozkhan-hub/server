@@ -20,6 +20,10 @@ const {
   profileView,
   suggestedFriends,
 } = require("../controllers/users.controllers");
+
+// authentication
+userRouter.post("/register", addUser);
+userRouter.post("/login", loginUser);
 // user routes
 userRouter.post("/get-user/:id?", getUser);
 userRouter.patch("/update-user/:userId", updateUser);

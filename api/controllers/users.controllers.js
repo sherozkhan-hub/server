@@ -1,4 +1,5 @@
 const UserModel = require("../models/user.js");
+const FriendRequest = require("../models/friendRequest.js");
 // const PasswordReset = require("../models/passwordReset.models");
 const bcrypt = require("bcryptjs");
 const { signToken } = require("../helpers/signToken");
@@ -10,20 +11,18 @@ const addUser = async (req, res, next) => {
     // Generating salt and hashing the password
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(password, salt);
+    console.log(req.body.age);
+    const savedUser = new UserModel({ ...req.body });
 
-    req.body.userProfilePhotoPath = req?.fullFilePath;
+    savedUser.save();
 
-    const savedUser = await UserModel.saveUser(req.userId, req.body);
-
-    savedUser.status === "SUCCESS"
-      ? res.status(201).json({
-          message: "SUCCESS",
-          user: savedUser.data,
-        })
-      : res.status(500).json({
-          message: savedUser.status,
-          error: savedUser.error,
-        });
+    if (savedUser) {
+      return res.status(201).json({
+        success: true,
+        message: "User Created Successfully",
+        user: savedUser,
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       message: "SORRY: Something went wrong",
@@ -34,34 +33,38 @@ const addUser = async (req, res, next) => {
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
+    console.log(req.body);
     if (!(email || password)) {
       next("Please Provide User Credentials");
       return;
     }
+    console.log("email and password found");
 
     const userFound = await UserModel.findOne({ email }).populate({
       path: "friends",
       select: "firstName lastName location profileUrl -password",
     });
 
-    if (userFound.status !== "SUCCESS") {
+    if (!userFound) {
       return res.status(404).json({
         message: "INVALID USER",
       });
     }
-
-    const isMatch = await bcrypt.compare(password, userFound.data?.password);
+    console.log(userFound.password);
+    const isMatch = await bcrypt.compare(password, userFound.password);
 
     if (!isMatch) {
       next("Invalid Email or Password");
       return;
     }
-
-    res.status(201).json({
+    console.log("password matched");
+    console.log(userFound);
+    const token = await signToken(userFound._id);
+    console.log(token);
+    return res.status(201).json({
       success: true,
       message: "Login Successful",
-      user,
+      userFound,
       token,
     });
   } catch (error) {
@@ -174,7 +177,7 @@ const updateUser = async (req, res, next) => {
 
 const friendRequest = async (req, res, next) => {
   try {
-    const { userId } = req.body.user;
+    const { userId } = req.body;
     const { requestTo } = req.body;
 
     const requestExist = await FriendRequest.findOne({
