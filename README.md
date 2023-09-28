@@ -1,5 +1,5 @@
 
-There are currently these two users... 
+you can use these two users... 
    
    "email": "bob@example.com",
   "password": "$yG1DlNP5"
