@@ -132,23 +132,24 @@ const getUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const { firstName, lastName, location, profileUrl, profession } = req.body;
+    const { userId } = req.body;
+    // const userId = extractUserIdFromToken(req);
+    const { firstName, lastName, location, profileUrl } = req.body;
 
-    if (!(firstName || lastName || location || profileUrl || profession)) {
+    console.log(userId, "whereeee");
+    if (!(firstName || lastName || location || profileUrl)) {
       next("Please Provide User Credentials");
       return;
     }
-
-    const { userId } = req.body.user;
 
     const updateUser = {
       firstName,
       lastName,
       location,
       profileUrl,
-      profession,
       _id: userId,
     };
+    console.log(updateUser, "hhyyy");
 
     const user = await UserModel.findByIdAndUpdate(userId, updateUser, {
       new: true,
@@ -156,9 +157,7 @@ const updateUser = async (req, res, next) => {
 
     await user.populate({ path: "friends", select: "-password" });
 
-    const token = createJWT(user._id);
-
-    user.password = undefined;
+    const token = signToken(user._id);
 
     if (user) {
       return res.status(200).json({
@@ -186,8 +185,7 @@ const friendRequest = async (req, res, next) => {
     });
 
     if (requestExist) {
-      next("Request already sent");
-      return;
+      return res.status(201).json({ message: "Request already sent" });
     }
 
     const accountExist = await FriendRequest.findOne({
@@ -196,8 +194,9 @@ const friendRequest = async (req, res, next) => {
     });
 
     if (accountExist) {
-      next("Request already sent");
-      return;
+      // next("Request already sent");
+      console.log("Request already sent");
+      return res.status(201).json({ message: "Request already sent" });
     }
 
     const newRes = await FriendRequest.create({
@@ -220,8 +219,8 @@ const friendRequest = async (req, res, next) => {
 
 const getFriendRequest = async (req, res, next) => {
   try {
-    const { userId } = req.body.user;
-
+    const { userId } = req.body;
+    console.log(userId, "reqqqq");
     const request = await FriendRequest.find({
       requestTo: userId,
       requestStatus: "Pending",
@@ -248,17 +247,17 @@ const getFriendRequest = async (req, res, next) => {
 
 const acceptRequest = async (req, res, next) => {
   try {
-    const id = req.body.user.userId;
+    const id = req.body.userId;
 
     const { rid, status } = req.body;
 
     const requestExist = await FriendRequest.findById(rid);
 
     if (!requestExist) {
-      next("Request not found");
+      next("Friend Request not found");
       return;
     }
-    const request = await FriendRequest.findByIdAndUpdate(
+    const newRes = await FriendRequest.findByIdAndUpdate(
       { _id: rid },
       { requestStatus: status }
     );
@@ -270,7 +269,7 @@ const acceptRequest = async (req, res, next) => {
 
       await user.save();
 
-      const friend = await Users.findById(newRes?.requestFrom);
+      const friend = await UserModel.findById(newRes?.requestFrom);
 
       friend.friends.push(newRes?.requestTo);
 
@@ -292,7 +291,7 @@ const acceptRequest = async (req, res, next) => {
 
 const profileView = async (req, res, next) => {
   try {
-    const { userId } = req.body.user;
+    const { userId } = req.body;
     const { id } = req.body;
 
     const user = await UserModel.findById(id);
@@ -313,20 +312,44 @@ const profileView = async (req, res, next) => {
   }
 };
 
+// const suggestedFriends = async (req, res, next) => {
+//   try {
+//     const { userId } = req.body;
+
+//     let query = {};
+
+//     query._id = { $ne: userId };
+//     query.friends = { $nin: userId };
+
+//     let queryResult = UserModel.find(query)
+//       .limit(15)
+//       .select("firstName lastName location profileUrl -password");
+
+//     const suggestedFriends = await queryResult;
+
+//     res.status(200).json({
+//       success: true,
+//       data: suggestedFriends,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: "auth error",
+//       success: false,
+//       error: error.message,
+//     });
+//   }
+// };
+
 const suggestedFriends = async (req, res, next) => {
   try {
-    const { userId } = req.body.user;
-
-    let query = {};
-
-    queryObject._id = { $ne: userId };
-    queryObject.friends = { $nin: userId };
-
-    let queryResult = Users.find(query)
+    const { userId } = req.body;
+    console.log(userId, "whereeee sugg");
+    const suggestedFriends = await UserModel.find({
+      _id: { $ne: userId }, // Exclude the user with the specified userId
+      friends: { $nin: userId },
+    })
       .limit(15)
       .select("firstName lastName location profileUrl -password");
-
-    const suggestedFriends = await queryResult;
 
     res.status(200).json({
       success: true,

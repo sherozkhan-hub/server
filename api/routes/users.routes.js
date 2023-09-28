@@ -25,26 +25,26 @@ const {
 userRouter.post("/register", addUser);
 userRouter.post("/login", loginUser);
 // user routes
-userRouter.post("/get-user/:id?", getUser);
-userRouter.patch("/update-user/:userId", updateUser);
+userRouter.get("/get-user/:id?", authentication, getUser);
+userRouter.put("/update-user", authentication, updateUser);
 
 // friend request routes
-userRouter.post("friend-request", friendRequest);
-userRouter.post("/get-friend-request", getFriendRequest);
+userRouter.post("/friend-request", authentication, friendRequest);
+userRouter.get("/get-friend-request", authentication, getFriendRequest);
 
-userRouter.post("/accept-request", acceptRequest);
+userRouter.post("/accept-request", authentication, acceptRequest);
 
 // view profiles
-userRouter.get("/profile-view/:userId", profileView);
+userRouter.get("/profile-view/:userId", authentication, profileView);
 
 // suggested friends
-userRouter.get("/suggested-friends", suggestedFriends);
+userRouter.post("/suggested-friends", authentication, suggestedFriends);
 
 userRouter.get("/login", loginUser);
 
-userRouter.get("/list", authentication, authorization, listUsers);
+userRouter.get("/list", authentication, listUsers);
 
-userRouter.get("/getUserById/:userId", authentication, authorization);
+userRouter.get("/getUserById/:userId", authentication);
 
 module.exports = {
   userRouter,

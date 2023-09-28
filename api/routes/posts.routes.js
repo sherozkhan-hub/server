@@ -19,6 +19,7 @@ const {
 // posts routes
 postRouter.post("/create-post", authentication, createPost);
 postRouter.get("/", authentication, getPosts);
+postRouter.post("/", authentication, getPosts);
 postRouter.get("/:id", authentication, getPost);
 
 postRouter.get("/get-user-post/:id", authentication, getUserPost);
