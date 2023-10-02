@@ -1,12 +1,6 @@
 const express = require("express");
 const userRouter = express.Router();
 const { authentication } = require("../middlewares/authentication.middleware");
-const { authorization } = require("../middlewares/authorization.middleware");
-const { generateId } = require("../middlewares/generateId.middleware.js");
-const uploadProfile = require("../middlewares/uploadProfile.middleware.js");
-const { validateInput } = require("../middlewares/validateInput.middleware.js");
-
-const { addUserSchema } = require("../validators/user.validator");
 
 const {
   addUser,
